@@ -45,17 +45,14 @@ var getMonthlyTotals = function(activities) {
 			totals.time = 0;
 			monthlyTotals[month] = totals;
 		}
-		monthlyTotals[month].footies += activity.total_elevation_gain * 3.28084;
-		monthlyTotals[month].miles += activity.distance * 0.000621371;
+		monthlyTotals[month].footies += activity.total_elevation_gain;
+		monthlyTotals[month].miles += activity.distance;
 		monthlyTotals[month].time += activity.elapsed_time;
 	}
 
 	var results = [];
 
 	for ( var m in monthlyTotals) {
-		console.log(m)
-		monthlyTotals[m].footies = parseFloat(monthlyTotals[m].footies.toFixed(0));
-		monthlyTotals[m].miles = parseFloat(monthlyTotals[m].miles.toFixed(2));
 		results.push(monthlyTotals[m]);
 	}
 	

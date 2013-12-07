@@ -18,10 +18,10 @@ var activitiesHtmlLink = '<html><head></head><body><a href="/activities">See act
 
 var activityParerDowner = function(k, v) {
 
-	if ( k == "distance" ) { 
-		return v * 0.000621371;
-	} else if (  k=="total_elevation_gain") {
-		return v * 3.28084;
+	if ( k === "distance" ) {
+		return parseFloat((v *0.000621371).toFixed(2));
+	} else if (  k ==="total_elevation_gain") {
+		return parseFloat((v *3.28084).toFixed(0));
 	} 		
 	return v;
 

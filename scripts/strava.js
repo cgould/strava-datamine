@@ -73,7 +73,7 @@ strava.activities = function(accessToken, reviver, callback) {
 		}
 		console.log(url);
 		request.get( url, function(err, response, body) {
-			var batchResults = JSON.parse(body);
+			var batchResults = JSON.parse(body, reviver);
 			if ( batchResults ) {
 				finalResults = finalResults.concat(batchResults);
 				if ( batchResults.length == 200 ) {
