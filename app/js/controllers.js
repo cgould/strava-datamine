@@ -59,6 +59,37 @@ var getMonthlyTotals = function(activities) {
 	return results;
 };
 
+var ONE_HOUR = 1000 * 60 * 60;
+
+var findDupes = function(activities) {
+	// This assumes activities are ordered
+	console.log('in find Dupes');
+	var dupes = [];
+	var current = activities[0];
+	var currentTime = (new Date(current.start_date)).getTime();
+	var currentAlreadyAdded = false;
+	for ( var i = 1; i < activities.length; i++ ) {
+		var next = activities[i];
+		var nextTime = (new Date(next.start_date)).getTime();
+		console.log( 'next:' + nextTime + "- current:" + currentTime + " - (" + (nextTime - currentTime) + ')');
+		if ( Math.abs(currentTime - nextTime < ONE_HOUR )) {
+			if (currentAlreadyAdded == false) {
+				dupes.push(current);
+				console.log( 'adding current:' + current.start_date);
+			}
+			
+			dupes.push(next);
+			console.log( 'adding next:' + next.start_date);
+			currentAlreadyAdded = true;
+		} else {
+			currentAlreadyAdded = false;
+		} 
+		current = next;
+		currentTime = nextTime;
+	}
+	return dupes;
+};
+
 angular.module('myApp.controllers', [])
 	.controller('MyCtrl1', [function() {
 	
@@ -71,5 +102,9 @@ angular.module('myApp.controllers', [])
 	.controller('allActivities', function($scope, $http){
 		$scope.activities = getActivities($http);
 		$scope.sortOrder = '-date';
-	}) ;
+	})
+	.controller('findDupes', function ($scope, $http) {
+		var activities = getActivities($http);
+		$scope.activities = findDupes(activities);
+	});
 
