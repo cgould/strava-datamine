@@ -61,9 +61,11 @@ var getMonthlyTotals = function(activities) {
 
 var ONE_HOUR = 1000 * 60 * 60;
 
-var findDupes = function(activities) {
+
+var findDupes = function($scope, activities) {
 	// This assumes activities are ordered
-	console.log('in find Dupes');
+	//console.log('searchCriteria:' + $scope.searchCriteria.startDate + '-' + $scope.searchCriteria.endDate);
+	console.log('in findDupes');
 	var dupes = [];
 	var current = activities[0];
 	var currentTime = (new Date(current.start_date)).getTime();
@@ -71,15 +73,12 @@ var findDupes = function(activities) {
 	for ( var i = 1; i < activities.length; i++ ) {
 		var next = activities[i];
 		var nextTime = (new Date(next.start_date)).getTime();
-		console.log( 'next:' + nextTime + "- current:" + currentTime + " - (" + (nextTime - currentTime) + ')');
 		if ( Math.abs(currentTime - nextTime < ONE_HOUR )) {
 			if (currentAlreadyAdded == false) {
 				dupes.push(current);
-				console.log( 'adding current:' + current.start_date);
 			}
 			
 			dupes.push(next);
-			console.log( 'adding next:' + next.start_date);
 			currentAlreadyAdded = true;
 		} else {
 			currentAlreadyAdded = false;
@@ -105,6 +104,13 @@ angular.module('myApp.controllers', [])
 	})
 	.controller('findDupes', function ($scope, $http) {
 		var activities = getActivities($http);
-		$scope.activities = findDupes(activities);
+		$scope.searchCriteria = { "startDate" : null, "endDate" : null };
+		$scope.activities = findDupes($scope, activities);
+		$scope.doSearch = function() {
+			if ( typeof $scope.searchCriteria !== 'undefined')
+				console.log( $scope.searchCriteria );
+			else
+				console.log('search criteria undefined');
+		}
 	});
 
