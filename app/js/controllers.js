@@ -2,14 +2,15 @@
 
 /* Controllers */
 
-var getActivities = function($http) {
+var getActivities = function($scope, $http) {
 	var activities;
 	if ( localStorage.activities ) {
 		activities = JSON.parse(localStorage.activities);
 	} else {
 		$http.get('/activities').success(function(data) {
-			activities = data;
+			$scope.activities = data;
 			localStorage.activities = JSON.stringify(data);
+			$scope.loading = false;
 		}).error(function(data) {
 			
 		});
@@ -62,7 +63,9 @@ var getMonthlyTotals = function(activities) {
 var ONE_HOUR = 1000 * 60 * 60;
 
 
-var findDupes = function($scope, activities) {
+var findDupes = function($scope, $http) {
+	var activities = getActivities($scope, $http);
+
 	// This assumes activities are ordered
 	//console.log('searchCriteria:' + $scope.searchCriteria.startDate + '-' + $scope.searchCriteria.endDate);
 	console.log('in findDupes');
@@ -94,18 +97,20 @@ angular.module('myApp.controllers', [])
 	
 	}])
 	.controller('monthlyTotals', function ($scope, $http) {
-		var activities = getActivities($http);
-		$scope.monthlyTotals = getMonthlyTotals(activities);
+		$scope.activities = getActivities($scope, $http);
+		$scope.monthlyTotals = getMonthlyTotals($scope.activities);
 		$scope.sortOrder = '-month';
 	})
 	.controller('allActivities', function($scope, $http){
-		$scope.activities = getActivities($http);
+		console.log('in allActivities');
+		$scope.loading = true;
+		getActivities($scope, $http);
+		$scope.loading = false;
 		$scope.sortOrder = '-date';
 	})
 	.controller('findDupes', function ($scope, $http) {
-		var activities = getActivities($http);
 		$scope.searchCriteria = { "startDate" : null, "endDate" : null };
-		$scope.activities = findDupes($scope, activities);
+		$scope.activities = findDupes($scope, $http);
 		$scope.doSearch = function() {
 			if ( typeof $scope.searchCriteria !== 'undefined')
 				console.log( $scope.searchCriteria );
