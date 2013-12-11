@@ -2,20 +2,18 @@
 
 /* Controllers */
 
-var getActivities = function($scope, $http) {
-	var activities;
+var getActivities = function($scope, $http, callback) {
 	if ( localStorage.activities ) {
-		activities = JSON.parse(localStorage.activities);
+		var activities = JSON.parse(localStorage.activities);
+		callback(activities);
 	} else {
 		$http.get('/activities').success(function(data) {
-			$scope.activities = data;
 			localStorage.activities = JSON.stringify(data);
-			$scope.loading = false;
+			callback(data);
 		}).error(function(data) {
 			
 		});
 	}
-	return activities;
 };
 
 var getPaddedMonth = function(d) {
@@ -31,65 +29,69 @@ var getBucketMonth = function( activity) {
 	return bucketMonth.getFullYear() + "-" + getPaddedMonth(bucketMonth); 
 };
 
-var getMonthlyTotals = function(activities) {
-	
-	var monthlyTotals = [];
+var getMonthlyTotals = function($scope, $http, callback) {
 
-	for ( var i = 0; i < activities.length; i++ ) {
-		var activity = activities[i];
-		var month = getBucketMonth(activity);
-		if (!(month in monthlyTotals)) {
-			var totals = {};
-			totals.month = month;
-			totals.footies = 0;
-			totals.miles = 0;
-			totals.time = 0;
-			monthlyTotals[month] = totals;
+	getActivities($scope, $http, function(activities) {
+
+		var monthlyTotals = [];
+	
+		for ( var i = 0; i < activities.length; i++ ) {
+			var activity = activities[i];
+			var month = getBucketMonth(activity);
+			if (!(month in monthlyTotals)) {
+				var totals = {};
+				totals.month = month;
+				totals.footies = 0;
+				totals.miles = 0;
+				totals.time = 0;
+				monthlyTotals[month] = totals;
+			}
+			monthlyTotals[month].footies += activity.total_elevation_gain;
+			monthlyTotals[month].miles += activity.distance;
+			monthlyTotals[month].time += activity.elapsed_time;
 		}
-		monthlyTotals[month].footies += activity.total_elevation_gain;
-		monthlyTotals[month].miles += activity.distance;
-		monthlyTotals[month].time += activity.elapsed_time;
-	}
-
-	var results = [];
-
-	for ( var m in monthlyTotals) {
-		results.push(monthlyTotals[m]);
-	}
 	
-	return results;
+		var results = [];
+	
+		for ( var m in monthlyTotals) {
+			results.push(monthlyTotals[m]);
+		}
+		callback(results);
+	});	
 };
 
 var ONE_HOUR = 1000 * 60 * 60;
 
 
-var findDupes = function($scope, $http) {
-	var activities = getActivities($scope, $http);
+var getDuplicateRecords = function($scope, $http, callback) {
 
-	// This assumes activities are ordered
-	//console.log('searchCriteria:' + $scope.searchCriteria.startDate + '-' + $scope.searchCriteria.endDate);
-	console.log('in findDupes');
-	var dupes = [];
-	var current = activities[0];
-	var currentTime = (new Date(current.start_date)).getTime();
-	var currentAlreadyAdded = false;
-	for ( var i = 1; i < activities.length; i++ ) {
-		var next = activities[i];
-		var nextTime = (new Date(next.start_date)).getTime();
-		if ( Math.abs(currentTime - nextTime < ONE_HOUR )) {
-			if (currentAlreadyAdded == false) {
-				dupes.push(current);
-			}
-			
-			dupes.push(next);
-			currentAlreadyAdded = true;
-		} else {
-			currentAlreadyAdded = false;
-		} 
-		current = next;
-		currentTime = nextTime;
-	}
-	return dupes;
+	getActivities($scope, $http, function(activities) {
+		
+		// This assumes activities are ordered
+		//console.log('searchCriteria:' + $scope.searchCriteria.startDate + '-' + $scope.searchCriteria.endDate);
+		var dupes = [];
+		var current = activities[0];
+		var currentTime = (new Date(current.start_date)).getTime();
+		var currentAlreadyAdded = false;
+		for ( var i = 1; i < activities.length; i++ ) {
+			var next = activities[i];
+			var nextTime = (new Date(next.start_date)).getTime();
+			console.log( nextTime);
+			if ( Math.abs(currentTime - nextTime < ONE_HOUR )) {
+				if (currentAlreadyAdded == false) {
+					dupes.push(current);
+				}
+				
+				dupes.push(next);
+				currentAlreadyAdded = true;
+			} else {
+				currentAlreadyAdded = false;
+			} 
+			current = next;
+			currentTime = nextTime;
+		}
+		callback(dupes);
+	});
 };
 
 angular.module('myApp.controllers', [])
@@ -97,25 +99,25 @@ angular.module('myApp.controllers', [])
 	
 	}])
 	.controller('monthlyTotals', function ($scope, $http) {
-		$scope.activities = getActivities($scope, $http);
-		$scope.monthlyTotals = getMonthlyTotals($scope.activities);
-		$scope.sortOrder = '-month';
+		 getMonthlyTotals($scope, $http, function(monthlyTotals){
+			$scope.monthlyTotals = monthlyTotals;
+			$scope.sortOrder = '-month';
+			
+		});
 	})
 	.controller('allActivities', function($scope, $http){
-		console.log('in allActivities');
-		$scope.loading = true;
-		getActivities($scope, $http);
-		$scope.loading = false;
-		$scope.sortOrder = '-date';
+		getActivities($scope, $http, function(activities) {
+			$scope.activities = activities;
+			$scope.sortOrder = '-date';
+		});
 	})
 	.controller('findDupes', function ($scope, $http) {
+
 		$scope.searchCriteria = { "startDate" : null, "endDate" : null };
-		$scope.activities = findDupes($scope, $http);
 		$scope.doSearch = function() {
-			if ( typeof $scope.searchCriteria !== 'undefined')
-				console.log( $scope.searchCriteria );
-			else
-				console.log('search criteria undefined');
-		}
+			getDuplicateRecords($scope, $http, function(dupes) {
+				$scope.dupes = dupes;
+			});
+		};
 	});
 

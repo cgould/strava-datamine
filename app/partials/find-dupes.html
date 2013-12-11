@@ -18,7 +18,7 @@
             <th><a href="" ng-click="sortOrder='average_speed'; reverse=!reverse">Ave Speed</a></th>
             <th><a href="" ng-click="sortOrder='max_speed'; reverse=!reverse">Max Speed</a></th>
         </tr>
-        <tr ng-repeat="activity in activities | orderBy:sortOrder:reverse">
+        <tr ng-repeat="activity in dupes | orderBy:sortOrder:reverse">
             <td><a href="http://www.strava.com/activities/{{activity.id}}">{{activity.name}}</a></td>
             <td>{{activity.distance}}</td>
             <td>{{activity.moving_time}}</td>
