@@ -1,3 +1,4 @@
+
 var stravaUtils = {};
 
 var propsToIgnore = [
@@ -45,11 +46,13 @@ var displayTimeFromSeconds = function(totalSec) {
 stravaUtils.activityParerDowner = function(k, v) {
 
 	if ( k === 'distance' ) {
-		return parseFloat((v *0.000621371).toFixed(2));
+		return v * 0.000621371; 
 	} else if (  k ==='total_elevation_gain') {
-		return parseFloat((v *3.28084).toFixed(0));
+		return v *3.28084;
 	} else if ( k === 'max_speed' || k === 'average_speed') {
-		return parseFloat((v*2.23694).toFixed(2));
+		return v*2.23694;
+	} else if ( k === 'start_date_local') {
+		return new Date(Date.parse(v));
 	} else if ( propsToIgnore.indexOf(k) != -1 ) {
 		return undefined;
 	}
