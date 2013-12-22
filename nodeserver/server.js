@@ -1,4 +1,4 @@
-var appUtils = require('./appUtils.js');
+var appUtils = require('./../scripts/appUtils.js');
 var strava = require('./strava.js');
 var request = require('request');
 var _ = require('underscore');
