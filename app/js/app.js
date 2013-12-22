@@ -14,5 +14,6 @@ config(['$routeProvider', function($routeProvider) {
 	$routeProvider.when('/all-activities', {templateUrl: 'partials/all-activities.html', controller: 'allActivities'});
 	$routeProvider.when('/monthly-totals', {templateUrl: 'partials/monthly-totals.html', controller: 'monthlyTotals'});
 	$routeProvider.when('/find-dupes', {templateUrl: 'partials/find-dupes.html', controller: 'findDupes'});
+	$routeProvider.when('/reload', {templateUrl: 'partials/all-activities.html', controller: 'reloadActivities'});
 	$routeProvider.otherwise({redirectTo: '/view1'});
 }]);

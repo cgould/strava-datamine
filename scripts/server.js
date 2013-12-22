@@ -5,10 +5,11 @@ var _ = require('underscore');
 
 var express = require("express");
 var app = express();
+app.use(express.static(process.cwd() + '/app'));
 app.use(express.logger());
 app.use(express.cookieParser());
+app.use(express.bodyParser());
 app.use(express.compress());
-app.use(express.static(process.cwd() + '/app'));
 
 var args = process.argv.splice(2);
 var stravaConfigFile = args[0];
@@ -59,6 +60,30 @@ var activityParerDowner = function(k, v) {
 
 };
 
+var zeroPad = function(d) {
+	return (d<10?'0'+d:d);	
+};
+
+var displayTimeFromSeconds = function(totalSec) {
+	var hours = parseInt( totalSec / 3600 ) % 24;
+	if ( hours > 10 ) {
+		console.log( "big hours:   " + totalSec + '-' + hours);
+	}
+	var minutes = parseInt( totalSec / 60 ) % 60;
+	var seconds = parseInt(totalSec % 60);
+	return hours + ':'  + zeroPad(minutes) + ':' + zeroPad(seconds);
+};
+
+
+var addDisplayTimes = function(activities) {
+	for (var i = 0; i < activities.length; i++) {
+		var activity = activities[i];
+		activity.moving_time_display = displayTimeFromSeconds( activity.moving_time);
+		activity.elapsed_time_display = displayTimeFromSeconds( activity.elapsed_time);
+	}
+	
+};
+
 app.get('/token_exchange', function(req, res){
 	
 	console.log( req.path + ":" + req.query.code);
@@ -78,10 +103,20 @@ app.get('/activities', function(req, res) {
 		res.send(401, 'Not authorized by Strava.')
 	} else {
 		strava.activities(accessToken, activityParerDowner, function(results) {
+			addDisplayTimes(results);
 			res.send(results);
 		});
 	}
 });
 
+app.put('/activities/*', function(req, res) {
+
+	var accessToken = req.cookies.access_token;
+	var id = req.params[0];
+	var private = req.body.private;
+	strava.setPrivate(accessToken, id, private, function(data) {
+		res.send(data);
+	});
+});
 
 app.listen(8080);

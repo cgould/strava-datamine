@@ -4,6 +4,7 @@ var moment = require('moment');
 
 var URL_OAUTH_TOKEN = 'https://www.strava.com/oauth/token';
 var URL_ACTIVITIES = 'https://www.strava.com/api/v3/athlete/activities';
+var URL_ACTIVITY = 'https://www.strava.com/api/v3/activities';
 
 
 var stravaAuth;
@@ -39,31 +40,26 @@ strava.oauthToken = function(code, callback) {
 var getOldestTimestamp = function(activities) {
 
 	var lastIndex = activities.length - 1;
-	console.log(lastIndex);
 	var lastRecord = activities[lastIndex];
 	
-	console.log(lastRecord);
 	var oldest = lastRecord.start_date_local;
 
 	// values are sorted newest to oldest
 	return  moment(oldest).valueOf() / 1000;
-/*
-	var oldest = moment().valueOf();
-	for (var i = 0; i < activities.length; i++) {
-		var current = moment(activities[i].start_date_local).valueOf();
-		if ( current < oldest)
-			oldest = current;
-	}
-	return oldest;
-*/	
+};
+
+var getOptions = function(accessToken, fullUrl) {
+
+	return { headers : { Authorization: "access_token " + accessToken }, url : fullUrl };
 };
 
 strava.activities = function(accessToken, reviver, callback) {
 
 	var baseUrl = URL_ACTIVITIES;
-	baseUrl += '?access_token=' + accessToken;
-	baseUrl += '&per_page=200';
-	
+//	baseUrl += '?access_token=' + accessToken;
+//	baseUrl += '&per_page=200';
+	baseUrl += '?per_page=200';
+
 	var finalResults = [];
 	
 	function fetch(olderThan) {
@@ -72,7 +68,8 @@ strava.activities = function(accessToken, reviver, callback) {
 			url += '&before=' + olderThan;
 		}
 		console.log(url);
-		request.get( url, function(err, response, body) {
+		var options = getOptions(accessToken, url);
+		request.get( options, function(err, response, body) {
 			var batchResults = JSON.parse(body, reviver);
 			if ( batchResults ) {
 				finalResults = finalResults.concat(batchResults);
@@ -87,6 +84,21 @@ strava.activities = function(accessToken, reviver, callback) {
 	}
 	
 	fetch();
+};
+
+strava.setPrivate = function( accessToken, activityId, privateValue, callback ) {
+	var postBody = {private: privateValue ? 1 : 0 };
+
+	var url = URL_ACTIVITY + '/' + activityId;
+	var options = getOptions(accessToken, url);
+	options.form = postBody;
+
+	console.log(options);
+
+	request.put(options, function(err, response, body) {
+		var results = JSON.parse(body);
+		callback(results);
+	});
 };
 
 module.exports = strava;

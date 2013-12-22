@@ -12,16 +12,18 @@
                 <th><a href="" ng-click="sortOrder='start_date_local'; reverse=!reverse">Date</a></th>
                 <th><a href="" ng-click="sortOrder='average_speed'; reverse=!reverse">Ave Speed</a></th>
                 <th><a href="" ng-click="sortOrder='max_speed'; reverse=!reverse">Max Speed</a></th>
+                <th><a href="" ng-click="sortOrder='private'; reverse=!reverse">Access</a></th>
             </tr>
             <tr ng-repeat="activity in activities | orderBy:sortOrder:reverse">
                 <td><a href="http://www.strava.com/activities/{{activity.id}}">{{activity.name}}</a></td>
                 <td>{{activity.distance}}</td>
-                <td>{{activity.moving_time}}</td>
-                <td>{{activity.elapsed_time}}</td>
+                <td>{{activity.moving_time_display}}</td>
+                <td>{{activity.elapsed_time_display}}</td>
                 <td>{{activity.total_elevation_gain}}</td>
                 <td>{{activity.start_date_local}}</td>
                 <td>{{activity.average_speed}}</td>
                 <td>{{activity.max_speed}}</td>
+                <td><a href="" ng-click="toggleAccess(activity)">{{activity.private}}</a></td>
             </tr>
         </table>
     </div>       

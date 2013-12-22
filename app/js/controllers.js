@@ -62,7 +62,6 @@ var getMonthlyTotals = function($scope, $http, callback) {
 
 var ONE_HOUR = 1000 * 60 * 60;
 
-
 var getDuplicateRecords = function($scope, $http, callback) {
 
 	getActivities($scope, $http, function(activities) {
@@ -76,7 +75,6 @@ var getDuplicateRecords = function($scope, $http, callback) {
 		for ( var i = 1; i < activities.length; i++ ) {
 			var next = activities[i];
 			var nextTime = (new Date(next.start_date)).getTime();
-			console.log( nextTime);
 			if ( Math.abs(currentTime - nextTime < ONE_HOUR )) {
 				if (currentAlreadyAdded == false) {
 					dupes.push(current);
@@ -94,6 +92,16 @@ var getDuplicateRecords = function($scope, $http, callback) {
 	});
 };
 
+var toggleActivityAccess = function($http, activity, callback) {
+
+	var formData = { private : !activity.private };
+	$http.put('/activities/'+ activity.id, formData).success(function(data) {
+		callback(data);
+	}).error(function(data) {
+
+	});
+};
+
 angular.module('myApp.controllers', [])
 	.controller('MyCtrl1', [function() {
 	
@@ -108,7 +116,12 @@ angular.module('myApp.controllers', [])
 	.controller('allActivities', function($scope, $http){
 		getActivities($scope, $http, function(activities) {
 			$scope.activities = activities;
-			$scope.sortOrder = '-date';
+			$scope.sortOrder = '-start_date_local';
+			$scope.toggleAccess = function(activity) {
+				toggleActivityAccess($http, activity, function(data){
+					activity.private = data.private;
+				});
+			};
 		});
 	})
 	.controller('findDupes', function ($scope, $http) {
@@ -118,6 +131,16 @@ angular.module('myApp.controllers', [])
 			getDuplicateRecords($scope, $http, function(dupes) {
 				$scope.dupes = dupes;
 			});
-		};
-	});
+		}
+	})
+	.controller('reloadActivities', function ($scope, $http, $location) {
+		localStorage.removeItem('activities');
+		localStorage.clear();
+		$scope.activities = null;
+		$location.path('/all-activities');
+/*		getActivities($scope, $http, function(activities) {
+			$scope.activities = activities;
+			$scope.sortOrder = '-date';
+		});
+*/	});
 
