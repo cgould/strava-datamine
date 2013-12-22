@@ -55,8 +55,6 @@ strava.oauthToken = function(code, callback) {
 strava.activities = function(accessToken, reviver, callback) {
 
 	var baseUrl = URL_ACTIVITIES;
-//	baseUrl += '?access_token=' + accessToken;
-//	baseUrl += '&per_page=200';
 	baseUrl += '?per_page=200';
 
 	var finalResults = [];
