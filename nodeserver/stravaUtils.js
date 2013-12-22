@@ -40,7 +40,7 @@ var displayTimeFromSeconds = function(totalSec) {
 	var hours = parseInt( totalSec / 3600 ) % 24;
 	var minutes = parseInt( totalSec / 60 ) % 60;
 	var seconds = parseInt(totalSec % 60);
-	return hours + ':'  + zeroPad(minutes) + ':' + zeroPad(seconds);
+	return (hours > 0 ? hours + ':' : "") + zeroPad(minutes) + ':' + zeroPad(seconds);
 };
 
 stravaUtils.activityParerDowner = function(k, v) {
