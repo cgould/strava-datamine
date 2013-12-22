@@ -10,8 +10,8 @@ var getActivities = function($scope, $http, callback) {
 		$http.get('/activities').success(function(data) {
 			localStorage.activities = JSON.stringify(data);
 			callback(data);
-		}).error(function(data) {
-			
+		}).error(function(data, status) {
+			console.log("Error:" + status);
 		});
 	}
 };
@@ -138,9 +138,5 @@ angular.module('myApp.controllers', [])
 		localStorage.clear();
 		$scope.activities = null;
 		$location.path('/all-activities');
-/*		getActivities($scope, $http, function(activities) {
-			$scope.activities = activities;
-			$scope.sortOrder = '-date';
-		});
-*/	});
+	});
 

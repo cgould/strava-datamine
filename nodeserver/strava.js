@@ -52,7 +52,7 @@ strava.oauthToken = function(code, callback) {
 	});
 };
 
-strava.activities = function(accessToken, reviver, callback) {
+strava.activities = function(accessToken, reviver, onSuccess, onError) {
 
 	var baseUrl = URL_ACTIVITIES;
 	baseUrl += '?per_page=200';
@@ -67,14 +67,18 @@ strava.activities = function(accessToken, reviver, callback) {
 		console.log(url);
 		var options = getOptions(accessToken, url);
 		request.get( options, function(err, response, body) {
-			var batchResults = JSON.parse(body, reviver);
-			if ( batchResults ) {
-				finalResults = finalResults.concat(batchResults);
-				if ( batchResults.length == 200 ) {
-					var oldestTimeStamp = getOldestTimestamp(batchResults);
-					return fetch(oldestTimeStamp);
-				} else {
-					return callback(finalResults);
+			if ( err || response.statusCode != 200 ) {
+				return onError(err, response.statusCode);
+			} else { 
+				var batchResults = JSON.parse(body, reviver);
+				if ( batchResults ) {
+					finalResults = finalResults.concat(batchResults);
+					if ( batchResults.length == 200 ) {
+						var oldestTimeStamp = getOldestTimestamp(batchResults);
+						return fetch(oldestTimeStamp);
+					} else {
+						return onSuccess(finalResults);
+					}
 				}
 			}
 		});
@@ -83,7 +87,7 @@ strava.activities = function(accessToken, reviver, callback) {
 	fetch();
 };
 
-strava.setPrivate = function( accessToken, activityId, privateValue, callback ) {
+strava.setPrivate = function( accessToken, activityId, privateValue, onSuccess, onError ) {
 	
 	var postBody = {private: privateValue ? 1 : 0 };
 	var url = URL_ACTIVITY + '/' + activityId;
@@ -91,8 +95,12 @@ strava.setPrivate = function( accessToken, activityId, privateValue, callback ) 
 	options.form = postBody;
 
 	request.put(options, function(err, response, body) {
-		var results = JSON.parse(body);
-		callback(results);
+		if ( err || response.statusCode != 200 ) {
+			onError(err, response.statusCode);
+		} else {
+			var results = JSON.parse(body);
+			onSuccess(results);
+		}
 	});
 };
 

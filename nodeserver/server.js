@@ -9,13 +9,28 @@ var app = express();
 app.use(express.static(process.cwd() + '/app'));
 app.use(express.logger());
 app.use(express.cookieParser());
-app.use(express.bodyParser());
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(express.compress());
 
 var args = process.argv.splice(2);
 var stravaConfigFile = args[0];
 var stravaAuth = appUtils.readConfigFile(stravaConfigFile);
 
+var getAccessToken = function(req, res, token) {
+	var accessToken = req.cookies.access_token;
+	if (_.isUndefined(accessToken) || accessToken === null ) {
+		res.send(401, 'Not authorized by Strava.')
+		return false;
+	} 
+	token.value = accessToken;
+	return true;
+};
+
+var handleError = function(res, err, statusCode) {
+	console.log('in handleError:' + statusCode);
+	res.send(statusCode);
+};
 
 app.get('/token_exchange', function(req, res){
 	
@@ -29,25 +44,29 @@ app.get('/token_exchange', function(req, res){
 
 app.get('/activities', function(req, res) {
 	
-	var accessToken = req.cookies.access_token;
-	if (_.isUndefined(accessToken) || accessToken === null ) {
-		res.send(401, 'Not authorized by Strava.')
-	} else {
-		strava.activities(accessToken, stravaUtils.activityParerDowner, function(results) {
+	var accessToken = {};
+	if ( getAccessToken(req, res, accessToken)) {
+		strava.activities(accessToken.value, stravaUtils.activityParerDowner, function(results) {
 			stravaUtils.addDisplayTimes(results);
 			res.send(results);
+		},function(err, statusCode){
+			handleError(res, err, statusCode);
 		});
 	}
 });
 
 app.put('/activities/*', function(req, res) {
 
-	var accessToken = req.cookies.access_token;
-	var id = req.params[0];
-	var private = req.body.private;
-	strava.setPrivate(accessToken, id, private, function(data) {
-		res.send(data);
-	});
+	var accessToken = {};
+	if ( getAccessToken(req, res, accessToken)) {
+		var id = req.params[0];
+		var private = req.body.private;
+		strava.setPrivate(accessToken.value, id, private, function(data) {
+			res.send(data);
+		},function(err, statusCode){
+			handleError(res, err, statusCode);
+		});
+	}
 });
 
 app.listen(8080);
