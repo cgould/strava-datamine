@@ -6,10 +6,25 @@ var URL_OAUTH_TOKEN = 'https://www.strava.com/oauth/token';
 var URL_ACTIVITIES = 'https://www.strava.com/api/v3/athlete/activities';
 var URL_ACTIVITY = 'https://www.strava.com/api/v3/activities';
 
-
 var stravaAuth;
 
 var strava = {};
+
+var getOldestTimestamp = function(activities) {
+
+	var lastIndex = activities.length - 1;
+	var lastRecord = activities[lastIndex];
+
+	var oldest = lastRecord.start_date_local;
+
+	// values are sorted newest to oldest
+	return  moment(oldest).valueOf() / 1000;
+};
+
+var getOptions = function(accessToken, fullUrl) {
+
+	return { headers : { Authorization: "access_token " + accessToken }, url : fullUrl };
+};
 
 strava.setConfig = function(config) {
 	stravaAuth = config;
@@ -35,22 +50,6 @@ strava.oauthToken = function(code, callback) {
 		var results = JSON.parse(body);
 		callback(results.access_token);
 	});
-};
-
-var getOldestTimestamp = function(activities) {
-
-	var lastIndex = activities.length - 1;
-	var lastRecord = activities[lastIndex];
-	
-	var oldest = lastRecord.start_date_local;
-
-	// values are sorted newest to oldest
-	return  moment(oldest).valueOf() / 1000;
-};
-
-var getOptions = function(accessToken, fullUrl) {
-
-	return { headers : { Authorization: "access_token " + accessToken }, url : fullUrl };
 };
 
 strava.activities = function(accessToken, reviver, callback) {
@@ -87,13 +86,11 @@ strava.activities = function(accessToken, reviver, callback) {
 };
 
 strava.setPrivate = function( accessToken, activityId, privateValue, callback ) {
+	
 	var postBody = {private: privateValue ? 1 : 0 };
-
 	var url = URL_ACTIVITY + '/' + activityId;
 	var options = getOptions(accessToken, url);
 	options.form = postBody;
-
-	console.log(options);
 
 	request.put(options, function(err, response, body) {
 		var results = JSON.parse(body);

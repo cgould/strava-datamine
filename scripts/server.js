@@ -89,10 +89,8 @@ app.get('/token_exchange', function(req, res){
 	console.log( req.path + ":" + req.query.code);
 	strava.setConfig(stravaAuth);
 	strava.oauthToken( req.query.code, function(access_token){
-		console.log('token_exchange: got token:' + access_token);
 		res.cookie('access_token', access_token, { maxAge: 5 * 365 * 24 * 60 * 60 * 1000 });
 		res.redirect('index.html');
-		res.send(activitiesHtmlLink);
 	});
 });
 
