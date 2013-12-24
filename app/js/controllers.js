@@ -137,12 +137,12 @@ angular.module('myApp.controllers', [])
 		getActivities($scope, $http, function(activities) {
 			$scope.activities = activities;
 			$scope.sortOrder = '-start_date_local';
-			$scope.toggleAccess = function(activity) {
-				toggleActivityAccess($http, activity, function(data){
-					activity.private = data.private;
-				});
-			};
 		});
+		$scope.toggleAccess = function(activity) {
+			toggleActivityAccess($http, activity, function(data){
+				activity.private = data.private;
+			});
+		};
 	})
 	.controller('findDupes', function ($scope, $http) {
 
