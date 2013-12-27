@@ -133,7 +133,18 @@ angular.module('myApp.controllers', [])
 			
 		});
 	})
-	.controller('allActivities', function($scope, $http){
+	.controller('allActivities', function($scope, $http, activities){
+		console.log('in controller');
+		activities.getAll().then(function(allActivities){
+			$scope.activities = allActivities;
+			$scope.sortOrder = '-start_date_local';
+			$scope.toggleAccess = function(activity) {
+				toggleActivityAccess($http, activity, function(data){
+					activity.private = data.private;
+				});
+			};
+		});
+/*		
 		getActivities($scope, $http, function(activities) {
 			$scope.activities = activities;
 			$scope.sortOrder = '-start_date_local';
@@ -143,6 +154,7 @@ angular.module('myApp.controllers', [])
 				activity.private = data.private;
 			});
 		};
+*/
 	})
 	.controller('findDupes', function ($scope, $http) {
 
