@@ -80,37 +80,6 @@ var getMonthlyTotals = function($scope, $http, callback) {
 	});	
 };
 
-var ONE_HOUR = 1000 * 60 * 60;
-
-var getDuplicateRecords = function($scope, $http, callback) {
-
-	getActivities($scope, $http, function(activities) {
-		
-		// This assumes activities are ordered
-		//console.log('searchCriteria:' + $scope.searchCriteria.startDate + '-' + $scope.searchCriteria.endDate);
-		var dupes = [];
-		var current = activities[0];
-		var currentTime = (new Date(current.start_date)).getTime();
-		var currentAlreadyAdded = false;
-		for ( var i = 1; i < activities.length; i++ ) {
-			var next = activities[i];
-			var nextTime = (new Date(next.start_date)).getTime();
-			if ( Math.abs(currentTime - nextTime < ONE_HOUR )) {
-				if (currentAlreadyAdded == false) {
-					dupes.push(current);
-				}
-				
-				dupes.push(next);
-				currentAlreadyAdded = true;
-			} else {
-				currentAlreadyAdded = false;
-			} 
-			current = next;
-			currentTime = nextTime;
-		}
-		callback(dupes);
-	});
-};
 
 var toggleActivityAccess = function($http, activity, callback) {
 
@@ -134,7 +103,6 @@ angular.module('myApp.controllers', [])
 		});
 	})
 	.controller('allActivities', function($scope, $http, activities){
-		console.log('in controller');
 		activities.getAll().then(function(allActivities){
 			$scope.activities = allActivities;
 			$scope.sortOrder = '-start_date_local';
@@ -144,30 +112,21 @@ angular.module('myApp.controllers', [])
 				});
 			};
 		});
-/*		
-		getActivities($scope, $http, function(activities) {
-			$scope.activities = activities;
-			$scope.sortOrder = '-start_date_local';
-		});
-		$scope.toggleAccess = function(activity) {
-			toggleActivityAccess($http, activity, function(data){
-				activity.private = data.private;
-			});
-		};
-*/
 	})
-	.controller('findDupes', function ($scope, $http) {
-
+	.controller('findDupes', function ($scope, $http, activities) {
+		activities.getDuplicates().then(function(duplicates){
+			$scope.dupes = duplicates;
+		});
 		$scope.searchCriteria = { "startDate" : null, "endDate" : null };
 		$scope.doSearch = function() {
-			getDuplicateRecords($scope, $http, function(dupes) {
-				$scope.dupes = dupes;
+			activities.getDuplicates().then(function(duplicates){
+				$scope.dupes = duplicates;
 			});
-		}
+		};
 	})
 	.controller('reloadActivities', function ($scope, $http, $location) {
 		localStorage.removeItem('activities');
-		localStorage.clear();
+//		localStorage.clear();
 		$scope.activities = null;
 		$location.path('/all-activities');
 	});
