@@ -55,7 +55,19 @@ services.factory('activities', function($http, $q) {
 				promise.resolve(dupes);
 			});
 			return promise.promise;
+		},
+
+		toggleActivityAccess : function(activity) {
+			var promise = $q.defer();
+			var formData = { private : !activity.private };
+			$http.put('/activities/'+ activity.id, formData).success(function(data) {
+				promise.resolve(data);
+			}).error(function(data) {
+
+			});
+			return promise.promise;
 		}
+		
 	};
 	return activities;
 });

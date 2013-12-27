@@ -80,17 +80,6 @@ var getMonthlyTotals = function($scope, $http, callback) {
 	});	
 };
 
-
-var toggleActivityAccess = function($http, activity, callback) {
-
-	var formData = { private : !activity.private };
-	$http.put('/activities/'+ activity.id, formData).success(function(data) {
-		callback(data);
-	}).error(function(data) {
-
-	});
-};
-
 angular.module('myApp.controllers', [])
 	.controller('MyCtrl1', [function() {
 	
@@ -107,7 +96,7 @@ angular.module('myApp.controllers', [])
 			$scope.activities = allActivities;
 			$scope.sortOrder = '-start_date_local';
 			$scope.toggleAccess = function(activity) {
-				toggleActivityAccess($http, activity, function(data){
+				activities.toggleActivityAccess(activity).then(function(data){
 					activity.private = data.private;
 				});
 			};
@@ -126,7 +115,6 @@ angular.module('myApp.controllers', [])
 	})
 	.controller('reloadActivities', function ($scope, $http, $location) {
 		localStorage.removeItem('activities');
-//		localStorage.clear();
 		$scope.activities = null;
 		$location.path('/all-activities');
 	});
