@@ -1,18 +1,30 @@
 <div>
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="optionGroupBy" class="col-sm-2 control-label">Group by:</label>
+            <select class="col-sm-5" id="optionGroupBy" ng-model="groupBy" ng-change="getTotals()">
+                <option value="all">All Time</option>
+                <option value="year">Year</option>
+                <option selected value="month">Month</option>
+                <option value="week">Week</option>
+                <option value="day">Day Of Week</option>
+            </select>
+        </div>
+    </form>
     <table class="table table-striped table-bordered table-condensed">
         <tr>
-            <th><p class="text-right"><a href="" ng-click="sortOrder='month'; reverse=!reverse">Month</a></p></th>
+            <th><p class="text-right"><a href="" ng-click="sortOrder='groupBy'; reverse=!reverse">Month</a></p></th>
             <th><p class="text-right"><a href="" ng-click="sortOrder='footies'; reverse=!reverse">Footies</a></p></th>
             <th><p class="text-right"><a href="" ng-click="sortOrder='miles'; reverse=!reverse">Miles</a></p></th>
             <th><p class="text-right"><a href="" ng-click="sortOrder='elapsed_time'; reverse=!reverse">Elapsed Time</a></p></th>
             <th><p class="text-right"><a href="" ng-click="sortOrder='moving_time'; reverse=!reverse">Moving Time</a></p></th>
         </tr>
-        <tr ng-repeat="monthlyTotal in monthlyTotals | orderBy:sortOrder:reverse">
-            <td><p class="text-right">{{monthlyTotal.month}}</p></td> 
-            <td><p class="text-right">{{monthlyTotal.footies | number:0}}</p></td>
-            <td><p class="text-right">{{monthlyTotal.miles| number:2}}</p></td>
-            <td><p class="text-right">{{monthlyTotal.elapsed_time_display}}</p></td>
-            <td><p class="text-right">{{monthlyTotal.moving_time_display}}</p></td>
+        <tr ng-repeat="total in totals | orderBy:sortOrder:reverse">
+            <td><p class="text-right">{{total.groupBy}}</p></td> 
+            <td><p class="text-right">{{total.footies | number:0}}</p></td>
+            <td><p class="text-right">{{total.miles| number:2}}</p></td>
+            <td><p class="text-right">{{total.elapsed_time_display}}</p></td>
+            <td><p class="text-right">{{total.moving_time_display}}</p></td>
         </tr>
     </table>
 </div>

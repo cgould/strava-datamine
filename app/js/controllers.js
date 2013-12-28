@@ -7,10 +7,14 @@ angular.module('myApp.controllers', [])
 	
 	}])
 	.controller('monthlyTotals', function ($scope, $http, activities) {
-		activities.getMonthlyTotals().then(function(monthlyTotals){
-			$scope.monthlyTotals = monthlyTotals;
-			$scope.sortOrder = '-month';
-		});
+		$scope.groupBy = 'month';
+		$scope.getTotals = function() {
+			activities.getTotals($scope.groupBy).then( function(totals) {
+				$scope.totals = totals;
+				$scope.sortOrder = '-groupBy';
+			});
+		}
+		$scope.getTotals($scope.groupBy);
 	})
 	.controller('allActivities', function($scope, $http, activities){
 		activities.getAll().then(function(allActivities){
@@ -24,15 +28,13 @@ angular.module('myApp.controllers', [])
 		});
 	})
 	.controller('findDupes', function ($scope, $http, activities) {
-		activities.getDuplicates().then(function(duplicates){
-			$scope.dupes = duplicates;
-		});
 		$scope.searchCriteria = { "startDate" : null, "endDate" : null };
 		$scope.doSearch = function() {
 			activities.getDuplicates().then(function(duplicates){
 				$scope.dupes = duplicates;
 			});
 		};
+		$scope.doSearch();
 	})
 	.controller('reloadActivities', function ($scope, $http, $location) {
 		localStorage.removeItem('activities');
