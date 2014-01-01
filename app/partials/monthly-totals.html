@@ -20,7 +20,7 @@
             <th><p class="text-right"><a href="" ng-click="sortOrder='moving_time'; reverse=!reverse">Moving Time</a></p></th>
         </tr>
         <tr ng-repeat="total in totals | orderBy:sortOrder:reverse">
-            <td><p class="text-right">{{total.groupBy}}</p></td> 
+            <td><p class="text-right">{{total.groupByDisplay}}</p></td> 
             <td><p class="text-right">{{total.footies | number:0}}</p></td>
             <td><p class="text-right">{{total.miles| number:2}}</p></td>
             <td><p class="text-right">{{total.elapsed_time_display}}</p></td>

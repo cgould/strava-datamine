@@ -1,7 +1,8 @@
 'use strict';
 
 var ONE_HOUR = 1000 * 60 * 60;
-var ONE_WEEK = 7 * 24 * ONE_HOUR;
+var ONE_DAY = 24 * ONE_HOUR;
+var ONE_WEEK = 7 * ONE_DAY;
 
 var services = angular.module('myApp.services', []).
   value('version', '0.1');
@@ -12,8 +13,8 @@ services.factory('activities', function($http, $q) {
 
 	var getWeek = function (d) {
 		var target  = new Date(d.valueOf());
-		var dayNr   = (d.getDay() + 6) % 7;
-		target.setDate(target.getDate() - dayNr + 3);
+		var dayNr   = (d.getDay() + 7) % 7;
+		target.setDate(target.getDate() - dayNr + 4);
 		var firstThursday = target.valueOf();
 		target.setMonth(0, 1);
 		if (target.getDay() != 4) {
@@ -31,7 +32,7 @@ services.factory('activities', function($http, $q) {
 		return target.getFullYear();
 	};
 	
-	var getPaddedMonth = function(d) {
+	var getDisplayMonth = function(d) {
 		var unpaddedMonth = d.getMonth() + 1;
 		return zeroPad(unpaddedMonth);
 	};
@@ -40,30 +41,29 @@ services.factory('activities', function($http, $q) {
 		return 'all dates';	
 	};
 
-	var getGroupYear = function( activity) {
+	var getStartDate = function( activity) {
 		var dt = activity.start_date_local;
-		var d = new Date(Date.parse(dt));
+		return new Date(Date.parse(dt));
+	};
+	
+	var getGroupYear = function(activity) {
+		var d = getStartDate(activity);
 		return d.getFullYear();
 	};
 
 	var getGroupMonth = function( activity) {
-		var dt = activity.start_date_local;
-		var d = new Date(Date.parse(dt));
-		var paddedMonth = getPaddedMonth(d);
-		var bucketMonth = new Date(Date.parse(d.getFullYear() + "-" + paddedMonth + "-01T00:00:00-0800"));
-		return bucketMonth.getFullYear() + "-" + getPaddedMonth(bucketMonth);
+		var d = getStartDate(activity);
+		return d.getFullYear() + "-" +  getDisplayMonth(d);
 	};
 
 	var getGroupWeek = function(activity){
-		var dt = activity.start_date_local;
-		var d = new Date(Date.parse(dt));
+		var d = getStartDate(activity);
 		return getWeekYear(d) + '-' + zeroPad(getWeek(d));
 	};
 	
 	var getGroupDay = function( activity) {
-		var dt = activity.start_date_local;
-		var d = new Date(Date.parse(dt));
-		return dayOfWeek[d.getDay()];
+		var d = getStartDate(activity);
+		return 7 - d.getDay();
 	};
 
 	// This should be shared code with stravaUtils.js.  Need to figure out where to put
@@ -97,30 +97,56 @@ services.factory('activities', function($http, $q) {
 		} 	
 	};
 	
-	var getTotals = function(groupBy) {
+	var getWeekDescription = function(activity) {
+		var d = getStartDate(activity);
+		var day = d.getDay();
+		var currentMillis = d.getTime();
+		var beginMillis = currentMillis - (day * ONE_DAY); 
+		var beginDate = new Date();
+		beginDate.setTime(beginMillis);
+		var endMillis = beginMillis + ONE_WEEK;
+		var endDate = new Date();
+		endDate.setTime(endMillis);
+		return beginDate.toLocaleDateString() + '-' + endDate.toLocaleDateString();
+	};
+	
+	var getGroupByDisplay = function(groupByWhat, group, activity) {
+		switch( groupByWhat) {
+			case 'week':
+				return getWeekDescription(activity);
+			case 'day':
+				var d = getStartDate(activity);
+				return dayOfWeek[d.getDay()];
+			default:
+				return group;
+		}
+	};
+	
+	var getTotals = function(groupByWhat) {
 
 		var promise = $q.defer();
-		var groupFunction = getGroupFunction(groupBy);
+		var groupFunction = getGroupFunction(groupByWhat);
 		getAll().then(function(allActivities) {
 			
 			var groupTotals = [];
 
 			for ( var i = 0; i < allActivities.length; i++ ) {
 				var activity = allActivities[i];
-				var month = groupFunction(activity);
-				if (!(month in groupTotals)) {
+				var group = groupFunction(activity);
+				if (!(group in groupTotals)) {
 					var totals = {};
-					totals.groupBy = month;
+					totals.groupBy = group;
+					totals.groupByDisplay = getGroupByDisplay(groupByWhat, group, activity);
 					totals.footies = 0;
 					totals.miles = 0;
 					totals.elapsed_time = 0;
 					totals.moving_time = 0;
-					groupTotals[month] = totals;
+					groupTotals[group] = totals;
 				}
-				groupTotals[month].footies += activity.total_elevation_gain;
-				groupTotals[month].miles += activity.distance;
-				groupTotals[month].elapsed_time += activity.elapsed_time;
-				groupTotals[month].moving_time += activity.moving_time;
+				groupTotals[group].footies += activity.total_elevation_gain;
+				groupTotals[group].miles += activity.distance;
+				groupTotals[group].elapsed_time += activity.elapsed_time;
+				groupTotals[group].moving_time += activity.moving_time;
 			}
 
 			var results = [];

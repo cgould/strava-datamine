@@ -17,6 +17,8 @@ var args = process.argv.splice(2);
 var stravaConfigFile = args[0];
 var stravaAuth = appUtils.readConfigFile(stravaConfigFile);
 
+var ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
+
 var getAccessToken = function(req, res, token) {
 	var accessToken = req.cookies.access_token;
 	if (_.isUndefined(accessToken) || accessToken === null ) {
@@ -37,7 +39,7 @@ app.get('/token_exchange', function(req, res){
 	console.log( req.path + ":" + req.query.code);
 	strava.setConfig(stravaAuth);
 	strava.oauthToken( req.query.code, function(access_token){
-		res.cookie('access_token', access_token, { maxAge: 5 * 365 * 24 * 60 * 60 * 1000 });
+		res.cookie('access_token', access_token, { maxAge: 5 * ONE_YEAR });
 		res.redirect('index.html');
 	});
 });
