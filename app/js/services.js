@@ -1,6 +1,7 @@
 'use strict';
 
 var ONE_HOUR = 1000 * 60 * 60;
+var ONE_WEEK = 7 * 24 * ONE_HOUR;
 
 var services = angular.module('myApp.services', []).
   value('version', '0.1');
@@ -8,10 +9,31 @@ var services = angular.module('myApp.services', []).
 services.factory('activities', function($http, $q) {
 
 	var dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+	var getWeek = function (d) {
+		var target  = new Date(d.valueOf());
+		var dayNr   = (d.getDay() + 6) % 7;
+		target.setDate(target.getDate() - dayNr + 3);
+		var firstThursday = target.valueOf();
+		target.setMonth(0, 1);
+		if (target.getDay() != 4) {
+			target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+		}
+		return 1 + Math.ceil((firstThursday - target) / ONE_WEEK); 
+	};
+
+	var getWeekYear = function (d)
+	{
+		// Create a new date object for the thursday of this week  
+		var target  = new Date(d.valueOf());
+		target.setDate(target.getDate() - ((d.getDay() + 6) % 7) + 3);
+
+		return target.getFullYear();
+	};
 	
 	var getPaddedMonth = function(d) {
 		var unpaddedMonth = d.getMonth() + 1;
-		return unpaddedMonth < 10 ? "0" + unpaddedMonth : unpaddedMonth;
+		return zeroPad(unpaddedMonth);
 	};
 	
 	var getGroupAll = function(activity){
@@ -32,6 +54,12 @@ services.factory('activities', function($http, $q) {
 		return bucketMonth.getFullYear() + "-" + getPaddedMonth(bucketMonth);
 	};
 
+	var getGroupWeek = function(activity){
+		var dt = activity.start_date_local;
+		var d = new Date(Date.parse(dt));
+		return getWeekYear(d) + '-' + zeroPad(getWeek(d));
+	};
+	
 	var getGroupDay = function( activity) {
 		var dt = activity.start_date_local;
 		var d = new Date(Date.parse(dt));
