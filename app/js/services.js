@@ -7,7 +7,40 @@ var ONE_WEEK = 7 * ONE_DAY;
 var services = angular.module('myApp.services', []).
   value('version', '0.1');
 
-services.factory('activities', function($http, $q) {
+services.factory('strava', function($http, $q) {
+	var getAllActivities = function() {
+		var promise = $q.defer();
+		if ( localStorage.activities ) {
+			promise.resolve(JSON.parse(localStorage.activities));
+		} else {
+			$http.get('/activities').success(function(data) {
+				localStorage.activities = JSON.stringify(data);
+				promise.resolve(data);
+			}).error(function(data, status) {
+					console.log("Error:" + status);
+				});
+		}
+		return promise.promise;
+	};
+
+	var toggleActivityAccess = function(activity) {
+		var promise = $q.defer();
+		var formData = { private : !activity.private };
+		$http.put('/activities/'+ activity.id, formData).success(function(data) {
+			promise.resolve(data);
+		}).error(function(data) {
+
+			});
+		return promise.promise;
+	};
+
+	return {
+		getAllActivities : getAllActivities,
+		toggleActivityAccess : toggleActivityAccess
+	}
+});
+
+services.factory('activities', function($http, $q, strava) {
 
 	var dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -162,18 +195,7 @@ services.factory('activities', function($http, $q) {
 	};
 
 	var getAll = function() {
-		var promise = $q.defer();
-		if ( localStorage.activities ) {
-			promise.resolve(JSON.parse(localStorage.activities));
-		} else {
-			$http.get('/activities').success(function(data) {
-				localStorage.activities = JSON.stringify(data);
-				promise.resolve(data);
-			}).error(function(data, status) {
-				console.log("Error:" + status);				
-			});
-		}
-		return promise.promise;
+		return strava.getAllActivities();
 	};
 	
 	var getDuplicates = function() {
@@ -208,14 +230,7 @@ services.factory('activities', function($http, $q) {
 	};
 
 	var toggleActivityAccess = function(activity) {
-		var promise = $q.defer();
-		var formData = { private : !activity.private };
-		$http.put('/activities/'+ activity.id, formData).success(function(data) {
-			promise.resolve(data);
-		}).error(function(data) {
-
-		});
-		return promise.promise;
+		return strava.toggleActivityAccess(activity);
 	};
 	
 	return {
