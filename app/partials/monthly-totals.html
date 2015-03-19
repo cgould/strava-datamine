@@ -9,6 +9,12 @@
                 <option value="week">Week</option>
                 <option value="day">Day Of Week</option>
             </select>
+            <label for="optionActivityType" class="col-sm-2 control-label">Type:</label>
+            <select class="col-sm-5" id="optionActivityType" ng-model="activityType" ng-change="getTotals()">
+                <option selected value="all">All</option>
+                <option value="ride">Ride</option>
+                <option value="rideAndHike">Ride and Hike</option>
+            </select>
         </div>
     </form>
     <table class="table table-striped table-bordered table-condensed">

@@ -10,6 +10,9 @@
     "karma-ng-scenario": "~0.1"
   },
   "dependencies": {
-    "angular-momentjs": "0.0.5"
+    "request": "~2.34.0",
+    "underscore": "~1.6.0",
+    "express": "~3.4.8",
+    "moment": "~2.5.1"
   }
 }

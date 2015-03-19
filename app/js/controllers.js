@@ -8,13 +8,15 @@ angular.module('myApp.controllers', [])
 	}])
 	.controller('monthlyTotals', function ($scope, $http, activities) {
 		$scope.groupBy = 'month';
+		$scope.activityType = 'rideAndHike'
 		$scope.getTotals = function() {
-			activities.getTotals($scope.groupBy).then( function(totals) {
+			console.log('in controller');
+			activities.getTotals($scope.groupBy, $scope.activityType).then( function(totals) {
 				$scope.totals = totals;
 				$scope.sortOrder = '-groupBy';
 			});
 		}
-		$scope.getTotals($scope.groupBy);
+		$scope.getTotals($scope.groupBy, $scope.activityType);
 	})
 	.controller('allActivities', function($scope, $http, activities){
 		activities.getAll().then(function(allActivities){

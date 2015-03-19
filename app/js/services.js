@@ -155,31 +155,37 @@ services.factory('activities', function($http, $q, strava) {
 		}
 	};
 	
-	var getTotals = function(groupByWhat) {
+	var getTotals = function(groupByWhat, activityType) {
 
+		console.log('in getTotals');
 		var promise = $q.defer();
 		var groupFunction = getGroupFunction(groupByWhat);
 		getAll().then(function(allActivities) {
 			
 			var groupTotals = [];
+			var activityTypes = ['Ride', 'Hike'];
 
 			for ( var i = 0; i < allActivities.length; i++ ) {
 				var activity = allActivities[i];
-				var group = groupFunction(activity);
-				if (!(group in groupTotals)) {
-					var totals = {};
-					totals.groupBy = group;
-					totals.groupByDisplay = getGroupByDisplay(groupByWhat, group, activity);
-					totals.footies = 0;
-					totals.miles = 0;
-					totals.elapsed_time = 0;
-					totals.moving_time = 0;
-					groupTotals[group] = totals;
+				console.log(activity.type);
+				if ( activityTypes.indexOf(activity.type) > -1 ) {
+					console.log('found match');
+					var group = groupFunction(activity);
+					if (!(group in groupTotals)) {
+						var totals = {};
+						totals.groupBy = group;
+						totals.groupByDisplay = getGroupByDisplay(groupByWhat, group, activity);
+						totals.footies = 0;
+						totals.miles = 0;
+						totals.elapsed_time = 0;
+						totals.moving_time = 0;
+						groupTotals[group] = totals;
+					}
+					groupTotals[group].footies += activity.total_elevation_gain;
+					groupTotals[group].miles += activity.distance;
+					groupTotals[group].elapsed_time += activity.elapsed_time;
+					groupTotals[group].moving_time += activity.moving_time;
 				}
-				groupTotals[group].footies += activity.total_elevation_gain;
-				groupTotals[group].miles += activity.distance;
-				groupTotals[group].elapsed_time += activity.elapsed_time;
-				groupTotals[group].moving_time += activity.moving_time;
 			}
 
 			var results = [];
