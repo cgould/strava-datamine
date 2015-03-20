@@ -8,7 +8,7 @@ angular.module('myApp.controllers', [])
 	}])
 	.controller('monthlyTotals', function ($scope, $http, activities) {
 		$scope.groupBy = 'month';
-		$scope.activityType = 'rideAndHike'
+		$scope.activityType = 'Ride'
 		$scope.getTotals = function() {
 			console.log('in controller');
 			activities.getTotals($scope.groupBy, $scope.activityType).then( function(totals) {

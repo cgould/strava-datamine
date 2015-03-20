@@ -163,12 +163,11 @@ services.factory('activities', function($http, $q, strava) {
 		getAll().then(function(allActivities) {
 			
 			var groupTotals = [];
-			var activityTypes = ['Ride', 'Hike'];
 
 			for ( var i = 0; i < allActivities.length; i++ ) {
 				var activity = allActivities[i];
 				console.log(activity.type);
-				if ( activityTypes.indexOf(activity.type) > -1 ) {
+				if ( activityType == 'all' || activityType == activity.type) {
 					console.log('found match');
 					var group = groupFunction(activity);
 					if (!(group in groupTotals)) {

@@ -1,20 +1,32 @@
 <div>
     <form class="form-horizontal" role="form">
-        <div class="form-group">
-            <label for="optionGroupBy" class="col-sm-2 control-label">Group by:</label>
-            <select class="col-sm-5" id="optionGroupBy" ng-model="groupBy" ng-change="getTotals()">
-                <option value="all">All Time</option>
-                <option value="year">Year</option>
-                <option selected value="month">Month</option>
-                <option value="week">Week</option>
-                <option value="day">Day Of Week</option>
-            </select>
-            <label for="optionActivityType" class="col-sm-2 control-label">Type:</label>
-            <select class="col-sm-5" id="optionActivityType" ng-model="activityType" ng-change="getTotals()">
-                <option selected value="all">All</option>
-                <option value="ride">Ride</option>
-                <option value="rideAndHike">Ride and Hike</option>
-            </select>
+        <div class="form-group container">
+            <div class="row">
+                <label for="optionGroupBy" class="col-md-2 control-label">Group by:</label>
+                <select class="col-md-4" id="optionGroupBy" ng-model="groupBy" ng-change="getTotals()">
+                    <option value="all">All Time</option>
+                    <option value="year">Year</option>
+                    <option selected value="month">Month</option>
+                    <option value="week">Week</option>
+                    <option value="day">Day Of Week</option>
+                </select>
+            </div>
+            <div class="row">
+                <label for="optionActivityType" class="col-md-2 control-label">Type:</label>
+                <select class="col-md-4" id="optionActivityType" ng-model="activityType" ng-change="getTotals()">
+                    <option selected value="all">All</option>
+                    <option value="Ride">Ride</option>
+                    <option value="Run">Run</option>
+                    <option value="Swim">Swim</option>
+                    <option value="Hike">Hike</option>
+                    <option value="Walk">Walk</option>
+                    <option value="AlpineSki">Alpine Ski</option>
+                    <option value="BackcountrySki">Backcountry Ski</option>
+                    <option value="Canoeing">Canoeing</option>
+                    <option value="CrossCountrySkiing">Cross Country Skiing</option>
+                    <option value="Kayaking">Kayaking</option>
+                </select>
+            </div>
         </div>
     </form>
     <table class="table table-striped table-bordered table-condensed">
